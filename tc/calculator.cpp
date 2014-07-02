@@ -1,272 +1,89 @@
-
+#define debug
 #include <stdio.h>
 #include <conio.h>
 #include <math.h>
 #include <STDLIB.H>
 #include<STRING.H>
-typedef struct aaa {float x; int c;} ra;
+typedef struct aaa{int c; float x;}ra;
 
- float cal(char*s,float*A,float*B,float*C)
-   {float gtdem,gt=0;/*float mx[10];int mc[10];*/
-   int l,i,j,k;int n=-1;int ll,kk=1; float gtgt;char ss[100];ra ** mm;
+	float cal(char*s,float*A,float*B,float*C)
+	{int l,i,j,k,n=-1,gthua=0;
+	int ll,kk=1;
+	char ss[100];
+	float gtdem,gtdem2=0,gt=0;
+	ra **mx;
+/*	ra mm,nn;
+	mx[n]=(ra *)calloc(1,sizeof (ra));
+	mx[n]=&mm;                        */
 
-    l=strlen(s)-1;
-    for(i=l;i>=0;)
-    if(((s[i]<='9'&&s[i]>='0')||s[i]=='.')&&sscanf(s+i,"%f",gtdem))/*((s[i]<58&&s[i]>47)||s[i]==46)*/
-	 {i--;
-	 if(i<0)
-	    {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-	    sscanf(s+i+1,"%f",&(mm[n]->x));mm[n]->c=0;}
-	 }
-    else
-
-	 switch(s[i])
-	{ case '+': {if(sscanf(s+i,"%f",&gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i,"%f",&(mm[n]->x));
-				#ifdef DEBUG
-				printf("\n%f   %d",(mm[n]->x),n);
-				#endif
-				}
-		     i--; break;
-		     }
-	  case'-': if(sscanf(s+i,"%f",&gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i,"%f",&(mm[n]->x));
-				#ifdef DEBUG
-				printf("\n%f   %d",(mm[n]->x),n);
-				#endif
-				}
-		      else  (mm[n]->x)=(mm[n]->x);
-		     i--;break;
-
-	   case'n':if((*(s+i-1)=='i')&&(*(s+i-2)=='s'))
-			  {if((s[i+1]<58&&s[i+1]>47)||s[i+1]==46)
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i+1,"%f",&(mm[n]->x));}
-			  (mm[n]->x)=sin(mm[n]->x);
-			  i-=3;break;
-			  }
-		   if ((*(s+i-1)=='a')&&(*(s+i-2)=='t'))
-			  {if((s[i+1]<58&&s[i+1]>47)||s[i+1]==46)
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i+1,"%f",&(mm[n]->x));}
-			  (mm[n]->x)=tan(mm[n]->x);
-			  i-=3;break;
-			  }
-		   if(*(s+i-1)=='l')
-			  {if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i+1,"%f",&(mm[n]->x));}
-			  if((mm[n]->x)<=0)
-				{
-				printf("\nkhong co: ln%f ",(mm[n]->x));
-				i=-1;n=-1;
-				break;
-				}
-			  (mm[n]->x)=log(mm[n]->x);
-			  i-=2;break;
-			  }
-		   break;
-	   case'g':if((*(s+i-1)=='o')&&(*(s+i-2)=='l'))
-			  {if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i+1,"%f",&(mm[n]->x));}
-
-			   if((mm[n]->x)<=0)
-				{i=-1;n=-1;
-				printf("\nco so phai >0");
-				break;
-				}
-			   mm[n]->c=4;
-			   i-=3;break;
-			  }
-		   if(*(s+i-1)=='l')
-			  {if((s[i+1]<58&&s[i+1]>47)||s[i+1]==46)
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i+1,"%f",&(mm[n]->x));}
-			   if((mm[n]->x)<=0)
-				{
-				printf("\nkhong co: lg%f ",(mm[n]->x));
-				i=-1;n=-1;
-				break;}
-			  (mm[n]->x)=log10(mm[n]->x);
-			   i-=2;
-			  }
-		   break;
-	   case's':if((*(s+i-1)=='o')&&(*(s+i-2)=='c'))
-			 {if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i+1,"%f",&(mm[n]->x));}
-			  (mm[n]->x)=cos((mm[n]->x));
-			   i-=3;
-			 }
-		   if((*(s+i-1)=='b')&&(*(s+i-2)=='a'))
-			 {if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				mm[n]->c=0;sscanf(s+i+1,"%f",&(mm[n]->x));
-				#ifdef DEBUG
-				printf("\n%f   %d",(mm[n]->x),n);
-				#endif
-				}
-			  (mm[n]->x)=fabs((mm[n]->x));
-			  i-=3;
-			 }
-		   break;
-	   case'p':if((*(s+i-1)=='x')&&(*(s+i-2)=='e'))
-		       {if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				sscanf(s+i+1,"%f",&(mm[n]->x));(mm[n]->x)=pow(10,(mm[n]->x));
-				#ifdef DEBUG
-				printf("\n%f   %d",(mm[n]->x),n);
-				#endif
-				}
-			i-=3;mm[n]->c=1;
-		       }
-		   break;
-
-	   case'*':if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				sscanf(s+i+1,"%f",&(mm[n]->x));
-				#ifdef DEBUG
-				printf("\n%f   %d",(mm[n]->x),n);
-				#endif
-				}
-			    i--; mm[n]->c=1;
-		   break;
-	   case'/':if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				sscanf(s+i+1,"%f",&(mm[n]->x));
-
-				if ((mm[n]->x)==0){i=-1;n=-1;
-					#ifdef DEBUG
-					printf("\nloi so bi chia");
-					#endif
-					     break;
-					     }
-				}
-			    i--;mm[n]->c=2;
-		   break;
-
-	   case'^':if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-				{n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				sscanf(s+i+1,"%f",&(mm[n]->x));
-				#ifdef DEBUG
-				printf("\n%f   %d",(mm[n]->x),n);
-				#endif
-				}
-
-			    i--;mm[n]->c=3;
-		   break;
-	   case')':
-				n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-			{
+	l=strlen(s)-1;
+	for(i=l;i>=0;)
+	  if(((s[i]<='9'&&s[i]>='0')||s[i]=='.')&&sscanf(s+i,"%f",&gtdem))
+		{i--;
+		if(i<0) {sscanf(s+i+1,"%f",&gtdem);gtdem2=1;
+			n++;mx[n]=(ra *)calloc(1,sizeof (ra));mx[n]->x=gtdem;mx[n]->c=0;
+			}
+		}
+	  else
+/*b1*/	  {
+/*gtdem*/ if((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.') {sscanf(s+i+1,"%f",&gtdem);gtdem2=1;}
+	  if(s[i]=='A') {gtdem=*A;i--;gtdem2=1;}
+	  if(s[i]=='B') {gtdem=*B;i--;gtdem2=1;}
+/*egtdem*/if(s[i]=='C') {gtdem=*C;i--;gtdem2=1;}
+	  if(s[i]==')') {
 			for(ll=i-1;ll>=0;ll--) { if(s[ll]=='(')kk--;
 						 if(s[ll]==')')k++;
 						 if(kk==0) break;
 						}
 			strncpy(ss,s+ll+1,(i-ll-1));ss[i-ll-1]=0;
 			i=ll-1;
-			(mm[n]->x)=cal(ss,A,B,C);mm[n]->c=0;
+			gtdem=cal(ss,A,B,C);
 			}
-		     break;
 
-	   case'A':
-		    if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-			  {n++; mm[n]=(ra*)calloc(1,sizeof (ra *));
-			  sscanf(s+i+1,"%f",&(mm[n]->x));mm[n]->c=1;
-			  n++;  mm[n]=(ra*)calloc(1,sizeof (ra *));
-			  (mm[n]->x)=*A;}
-			  else if(s[i+1]<='C'&&s[i+1]>='A')
-			   {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-			   (mm[n]->x)=*A;mm[n-1]->c=1;}
-			   else {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				(mm[n]->x)=*A;}
-		     i--;if(i<0)mm[n]->c=0;
-		     break;
+/*gth=1*/ if(gthua==1) 	if(gtdem>=0||(gtdem==(int)gtdem))
+			{gtdem2=1;
+			while(gtdem>1) {gtdem2*=gtdem;gtdem--;}
+			gtdem=gtdem2;
+			gthua=0;
+/*egth=1*/		}
+			else gthua=0;
 
-	   case'B':
-		    if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-			  {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-			  sscanf(s+i+1,"%f",&(mm[n]->x));mm[n]->c=1;
-			  n++; mm[n]=(ra*)calloc(1,sizeof (ra *));
-			  (mm[n]->x)=*B;
-			  #ifdef DEBUG
-			  printf("\n%f   %d",(mm[n]->x),n);
-			  #endif
-			  }
-			  else if(s[i+1]<='C'&&s[i+1]>='A')
-			   {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-			   (mm[n]->x)=*B;mm[n-1]->c=1;
-			   #ifdef DEBUG
-			   printf("\n%f   %d",(mm[n]->x),n);
-			   #endif
-			   }
-			   else {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				(mm[n]->x)=*B;
-				#ifdef DEBUG
-				printf("\n%f   %d",(mm[n]->x),n);
-				#endif
-				}
-		     i--; if(i<0)mm[n]->c=0;
-		     break;
-	   case'C':
-		    if(((s[i+1]<='9'&&s[i+1]>='0')||s[i+1]=='.')&&sscanf(s+i+1,"%f",gtdem))
-			  {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-			  sscanf(s+i+1,"%f",&(mm[n]->x));mm[n]->c=1;
-			  n++; mm[n]=(ra*)calloc(1,sizeof (ra *));
-			  (mm[n]->x)=*C;}
-			  else if(s[i+1]<='C'&&s[i+1]>='A')
-			   {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-			   (mm[n]->x)=*C;mm[n-1]->c=1;
-			   }
-			   else {n++;mm[n]=(ra*)calloc(1,sizeof (ra *));
-				(mm[n]->x)=*B;}
-		     i--;if(i<0)mm[n]->c=0;
-		     break;
-
-	   default:{strcpy(s+i,s+i+1);
-		   i--;}
+	  if(gtdem2){n++;mx[n]=(ra *)calloc(1,sizeof (ra));mx[n]->x=gtdem;mx[n]->c=1;}
+	  #ifdef debug
+	  printf("\n%f",gtdem);
+	  #endif
+	  switch(s[i])
+		{case'+':mx[n]->c=0;i--;break;
+		case'*':mx[n]->c=1;i--;break;
+		case'/':mx[n]->c=2;i--;break;
+		case'^':mx[n]->c=3;i--;break;
+		case'g':if((s[i-1]=='o')&&(s[i-2]=='l')){mx[n]->c=4;i-=3;break;}
+			if(s[i-1]=='l'){mx[n]->x=log10(mx[n]->x);i-=2;break;}
+		case'n':if(s[i-1]=='l'){mx[n]->x=log(mx[n]->x);i-=2;break;}
+			if((s[i-1]=='i')&&(s[i-2]=='s')){mx[n]->x=sin(mx[n]->x);i-=3;break;}
+			if((s[i-1]=='a')&&(s[i-2]=='t')){mx[n]->x=tan(mx[n]->x);i-=3;break;}
+		case's':if((s[i-1]=='o')&&(s[i-2]=='c')){mx[n]->x=cos(mx[n]->x);i-=3;break;}
+		case'!':gthua=1;i--;break;
+		default:i--;
+		}
+/*e1*/	  }
+	for(j=n;j>=0;j--)
+/*b2*/		if(mx[j]->c)
+		  {switch(mx[j]->c)
+		    {case 1:mx[j]->x=(mx[j+1]->x)*(mx[j]->x);mx[j]->c=mx[j+1]->c;break;
+		    case 2:mx[j]->x=(mx[j+1]->x)/(mx[j]->x);mx[j]->c=mx[j+1]->c;break;
+		    case 3:mx[j]->x=pow(mx[j+1]->x,mx[j]->x);mx[j]->c=mx[j+1]->c;break;
+		    case 4:mx[j]->x=log(mx[j+1]->x)/log(mx[j]->x);mx[j]->c=mx[j+1]->c;break;
+		    }
+	      /*  free(mx[j+1]);*/
+		  n--;
+		  for (k=j+1;k<=n;k++){mx[k]=mx[k+1];}
+/*e2*/            }
+	for(j=n;j>=0;j--)
+	gt=gt+mx[j]->x;
+	return gt;
 	}
-    for(j=n;j>=0;j--) {
-    /*b11*/   {
-	  if(mm[j]->c==1)
-	    {mm[j]->x=mm[j]->x*mm[j+1]->x;
-	    mm[j]->x=mm[j+1]->x;
-	    n--;
-	    for (k=j+1;k<=n;k++)
-	    {mm[k]->x=mm[k+1]->x;mm[k]->c=mm[k+1]->c;}
-	    }
-	  if(mm[j]->c==2)
-	    {mm[j]->x=mm[j+1]->x/mm[j]->x;
-	    mm[j]->c=mm[j+1]->c;
-	    n--;
-	    for (k=j+1;k<=n;k++){mm[k]->x=mm[k+1]->x;mm[k]->c=mm[k+1]->c;}
-	    }
-	  if(mm[j]->c==3)
-	    {mm[j]->x=pow(mm[j+1]->x,mm[j]->x);
-	    mm[j]->c=mm[j+1]->c;
-	    n--;
-	    for (k=j+1;k<=n;k++){mm[k]->x=mm[k+1]->x;mm[k]->c=mm[k+1]->c;}
-	    }
-	  if(mm[j]->c==4)
-	    if(mm[j+1]->x>0)
-	      {mm[j]->x=log(mm[j+1]->x)/log(mm[j]->x);
-	      mm[j]->c=mm[j+1]->c;
-	      n--;
-	      for (k=j+1;k<=n;k++){mm[k]->x=mm[k+1]->x;mm[k]->c=mm[k+1]->c;}
-	      free(mm[n+1]);
-	      }
-	    else {printf("\nkhong co:%flog%f",mm[j+1]->x,mm[j]->x);return 0;}
-/*e11*/	  }
 
-			}
-    for(j=n;j>=0;j--)
-    gt=gt+mm[j]->x;
-    free(mm[0]);
-    return gt;
-
-    }
 	void input(char*ss)
 	{char s[100];int i,l,k=0;
 	gets(s);l=strlen(s);
@@ -274,6 +91,7 @@ typedef struct aaa {float x; int c;} ra;
 	if(k==1) /*s[l]=')';s[l+1]=0;printf("\n%s",s);*/strcat(s,")");
 	strcpy(ss,s);
 	}
+
 void main()
 {char*ss;float f;float A=0,B=0,C=0;int menu;
 for(;;)
@@ -301,3 +119,4 @@ switch (menu)
 if(menu==0)break;
 }
 }
+
