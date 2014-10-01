@@ -30,7 +30,7 @@ public:
     {
         m_val = r.m_val;
     }
-    operator int ()
+    operator int()
     {
         return m_val;
     }
@@ -85,7 +85,7 @@ public:
     virtual tree_key& key() = 0;
     virtual ~node() {}
 };
-class node_int:public node
+class node_int :public node
 {
     node* m_pLeft;
     node* m_pRight;
@@ -199,7 +199,7 @@ int tree_search(node* pRoot, int key, node** ppFound = NULL, node** ppParent = N
         rc = key - NODE_KEY(pCur);
         if (rc == 0) break;
         pPrev = pCur;
-        pCur = (rc > 0)?NODE_RIGHT(pCur):NODE_LEFT(pCur);
+        pCur = (rc > 0) ? NODE_RIGHT(pCur) : NODE_LEFT(pCur);
     } while (pCur);
     if (ppFound) {
         *ppFound = pCur;
@@ -221,7 +221,7 @@ int tree_search(node* pRoot, node* pNode, node** ppFound = NULL, node** ppParent
         rc = NODE_KEY(pNode) - NODE_KEY(pCur);
         if (rc == 0) break;
         pPrev = pCur;
-        pCur = (rc > 0)?NODE_RIGHT(pCur):NODE_LEFT(pCur);
+        pCur = (rc > 0) ? NODE_RIGHT(pCur) : NODE_LEFT(pCur);
     } while (pCur);
     if (ppFound) {
         *ppFound = pCur;
@@ -246,7 +246,8 @@ int tree_insert(node* pRoot, node* pNode)
         assert(NODE_KEY(pNode) > NODE_KEY(pParent));
         assert(NODE_RIGHT(pParent) == 0);
         NODE_RIGHT(pParent) = pNode;
-    } else {
+    }
+    else {
         assert(NODE_KEY(pNode) < NODE_KEY(pParent));
         assert(NODE_LEFT(pParent) == 0);
         NODE_LEFT(pParent) = pNode;
@@ -277,7 +278,8 @@ node* tree_replace(node* pParent, node* pNode, node* pNew)
     if (pParent) {
         if (NODE_LEFT(pParent) == pNode) {
             NODE_LEFT(pParent) = pNew;
-        } else {
+        }
+        else {
             NODE_RIGHT(pParent) = pNew;
         }
         return pParent;
@@ -299,14 +301,17 @@ node* tree_remove(node* pRoot, node* pNode)
         NODE_RIGHT(pSuc) = tree_remove(NODE_RIGHT(pCur), pSuc);
         NODE_LEFT(pSuc) = NODE_LEFT(pCur);
         tree_replace(pParent, pCur, pSuc);
-    } else if (NODE_LEFT(pCur)) {
+    }
+    else if (NODE_LEFT(pCur)) {
         pSuc = tree_replace(pParent, pCur, NODE_LEFT(pCur));
-    } else if (NODE_RIGHT(pCur)) {
+    }
+    else if (NODE_RIGHT(pCur)) {
         pSuc = tree_replace(pParent, pCur, NODE_RIGHT(pCur));
-    } else {
+    }
+    else {
         pSuc = tree_replace(pParent, pCur, NULL);
     }
-    return (pRoot == pCur)? pSuc:pRoot;
+    return (pRoot == pCur) ? pSuc : pRoot;
 }
 
 node* tree_remove(node* pRoot, int key)
@@ -343,7 +348,7 @@ int tree_traverse_2(node* pRoot)
             printf("\n  level %d:\n  ", prevLevel);
             //printf("\n");
         }
-        printf("  %c %d  ", level>0?'\\':'/', (int)NODE_KEY(pCur));
+        printf("  %c %d  ", level > 0 ? '\\' : '/', (int)NODE_KEY(pCur));
         if (NODE_LEFT(pCur)) q.push(NODE_LEFT(pCur), 0 - (prevLevel + 1));
         if (NODE_RIGHT(pCur)) q.push(NODE_RIGHT(pCur), prevLevel + 1);
     }
@@ -372,7 +377,8 @@ public:
         if (m_pRoot == NULL) {
             m_pRoot = pNode;
             rc = true;
-        } else if (0 != tree_search(m_pRoot, pNode)) {
+        }
+        else if (0 != tree_search(m_pRoot, pNode)) {
             tree_insert(m_pRoot, pNode);
             rc = true;
         }
@@ -421,7 +427,7 @@ public:
             if (pNode == NULL) break;
             if (m_pRoot == NULL) break;
             rc = tree_search(m_pRoot, pNode) == 0;
-        } while(false);
+        } while (false);
         return rc;
     }
     //travese
@@ -451,7 +457,7 @@ void test_api_tree_remove()
     queue q(100);
     q.push(pRoot);
 
-    int arr[] = {3, 6, 0, 4, 8, 9, 2, 1, 7};
+    int arr[] = { 3, 6, 0, 4, 8, 9, 2, 1, 7 };
     for (int i = 0; i < 9; i++) {
         node* pNode = new node_int(arr[i]);
         tree_insert(pRoot, pNode);
@@ -490,7 +496,7 @@ void test_api_tree_remove()
     TRACE("\n");
 
     //free created node
-    while(!q.isEmpty()) {
+    while (!q.isEmpty()) {
         delete (node_int*)q.pop();
     }
 }
@@ -504,7 +510,7 @@ void test_api_tree_insert()
 
     srand(clock());
     for (int i = 0; i < 10; i++) {
-        int val = rand()%10;
+        int val = rand() % 10;
         node* tmp;
         int rc = (tree_search(pRoot, val, &tmp));
         TRACE("  search %d rc %d\n", val, rc);
@@ -521,7 +527,7 @@ void test_api_tree_insert()
     TRACE("\n");
 
     //free created node
-    while(!q.isEmpty()) {
+    while (!q.isEmpty()) {
         delete (node*)q.pop();
     }
 }
@@ -621,34 +627,20 @@ void test_type()
 }
 
 //-------------AVLTree
-class AVLnode: public node
+class AVLnode : public node
 {
 public:
     enum {
-        balanced  = 0,
+        balanced = 0,
         leftHeavy = -1,
         rightHeavy = 1,
     };
-    AVLnode() {
-        m_pLeft = NULL;
-        m_pRight = NULL;
-        m_status = 0;
-    }
-    node*& right() {return m_pRight;}
-    node*& left() {return m_pLeft;}
-    int& status()
-    {
-        return m_status;
-    }
-private:
-    node* m_pLeft;
-    node* m_pRight;
-    int m_status;
+    virtual int& status() = 0;
 };
 //-------------rotate
 AVLnode* AVLtree_single_rotate_left(AVLnode* pParent)
 {
-  TRACE("  single rotate left\n");
+    TRACE("  single rotate left\n");
 
     AVLnode* pRightChild = (AVLnode*)pParent->right();
     pParent->status() = AVLnode::balanced;
@@ -659,7 +651,7 @@ AVLnode* AVLtree_single_rotate_left(AVLnode* pParent)
 }
 AVLnode* AVLtree_single_rotate_right(AVLnode* pParent)
 {
-  TRACE("  single rotate right\n");
+    TRACE("  single rotate right\n");
     AVLnode* pLeftChild = (AVLnode*)pParent->left();
     pLeftChild->status() = AVLnode::balanced;
     pParent->status() = AVLnode::balanced;
@@ -669,17 +661,19 @@ AVLnode* AVLtree_single_rotate_right(AVLnode* pParent)
 }
 AVLnode* AVLtree_double_rotate_left(AVLnode* pParent)
 {
-  TRACE("  double rotate left\n");
+    TRACE("  double rotate left\n");
     AVLnode* pRightChild = (AVLnode*)pParent->right();
     AVLnode* pNewParent = (AVLnode*)pRightChild->left();
 
     if (pNewParent->status() == AVLnode::leftHeavy) {
         pParent->status() = AVLnode::balanced;
         pRightChild->status() = AVLnode::rightHeavy;
-    } else if (pNewParent->status() == AVLnode::balanced) {
+    }
+    else if (pNewParent->status() == AVLnode::balanced) {
         pParent->status() = AVLnode::balanced;
         pRightChild->status() = AVLnode::balanced;
-    } else {
+    }
+    else {
         pParent->status() = AVLnode::leftHeavy;
         pRightChild->status() = AVLnode::balanced;
     }
@@ -694,7 +688,7 @@ AVLnode* AVLtree_double_rotate_left(AVLnode* pParent)
 }
 AVLnode* AVLtree_double_rotate_right(AVLnode* pParent)
 {
-  TRACE("  double rotate right\n");
+    TRACE("  double rotate right\n");
 
     AVLnode* pLeftChild = (AVLnode*)pParent->left();
     AVLnode* pNewParent = (AVLnode*)pLeftChild->right();
@@ -702,10 +696,12 @@ AVLnode* AVLtree_double_rotate_right(AVLnode* pParent)
     if (pNewParent->status() == AVLnode::rightHeavy) {
         pParent->status() = AVLnode::balanced;
         pLeftChild->status() = AVLnode::leftHeavy;
-    } else if (pNewParent->status() == AVLnode::balanced) {
+    }
+    else if (pNewParent->status() == AVLnode::balanced) {
         pParent->status() = AVLnode::balanced;
         pLeftChild->status() = AVLnode::balanced;
-    } else {
+    }
+    else {
         pParent->status() = AVLnode::rightHeavy;
         pLeftChild->status() = AVLnode::balanced;
     }
@@ -757,7 +753,8 @@ AVLnode* AVLtree_insert_left(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
         pRoot->left() = pNode;
         pRoot->status() -= 1;
         heightChg = (pRoot->status() == AVLnode::leftHeavy);
-    } else {
+    }
+    else {
         //insert to left child
         int childHeightChg;
         pRoot->left() = AVLtree_insert((AVLnode*)pRoot->left(), pNode, &childHeightChg);
@@ -766,7 +763,7 @@ AVLnode* AVLtree_insert_left(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
         if (pRoot->status() < AVLnode::leftHeavy) {
             pRoot = AVLtree_update_left(pRoot, &heightChg);
         }
-        heightChg = (pRoot->status() == AVLnode::leftHeavy);
+        heightChg = childHeightChg && (pRoot->status() == AVLnode::leftHeavy);
     }
     *pHeightChg = heightChg;
     return pRoot;
@@ -780,7 +777,8 @@ AVLnode* AVLtree_insert_right(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
         pRoot->right() = pNode;
         pRoot->status() += 1;
         heightChg = (pRoot->status() == AVLnode::rightHeavy);
-    } else {
+    }
+    else {
         //insert to the right
         int childHeightChg;
         pRoot->right() = AVLtree_insert((AVLnode*)pRoot->right(), pNode, &childHeightChg);
@@ -789,7 +787,7 @@ AVLnode* AVLtree_insert_right(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
         if (pRoot->status() > AVLnode::rightHeavy) {
             pRoot = AVLtree_update_right(pRoot, &heightChg);
         }
-        heightChg = (pRoot->status() == AVLnode::rightHeavy);
+        heightChg = childHeightChg && (pRoot->status() == AVLnode::rightHeavy);
     }
     *pHeightChg = heightChg;
     return pRoot;
@@ -804,7 +802,8 @@ AVLnode* AVLtree_insert(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
     //left insert
     if (pRoot->key() > pNode->key()) {
         pRoot = AVLtree_insert_left(pRoot, pNode, &heightChg);
-    } else {
+    }
+    else {
         pRoot = AVLtree_insert_right(pRoot, pNode, &heightChg);
     }
     if (pHeightChg != NULL) {
@@ -820,65 +819,81 @@ int AVLtree_remove(AVLnode* pRoot, AVLnode* pNode)
 class AVLnode_int :public AVLnode
 {
     tree_key m_key;
+    node* m_pLeft;
+    node* m_pRight;
+    int m_status;
 public:
-    AVLnode_int(int val) {m_key = val;}
-    tree_key& key() {return m_key;}
+    AVLnode_int(int val)
+    {
+        m_key = val;
+        m_pLeft = NULL;
+        m_pRight = NULL;
+        m_status = 0;
+    }
+    tree_key& key() { return m_key; }
+    node*& left() { return m_pLeft; }
+    node*& right() { return m_pRight; }
+    int& status() { return m_status; }
 };
 void generate_keys(int* buff = NULL, int nKeys = 10, int range = 1)
 {
-  srand(clock());
-  queue q(nKeys);
-  int key = rand() % (nKeys*range);
-  //init
-  node* pRoot = new node_int(key);
-  q.push(pRoot);
-  if (buff) buff[0] = key;
-  int i = 1;
-  //generate keys
-  for (; i < nKeys;) {
-    key = rand() % (nKeys*range);
-    if (0 == tree_search(pRoot, key)) continue;
-    //create new node
-    node* pNode = new node_int(key);
-    tree_insert(pRoot, pNode);
-    if (buff) buff[i] = key;
-    q.push(pNode);
-    i++;
-  }
+    srand(clock());
+    queue q(nKeys);
+    int key = rand() % (nKeys*range);
+    //init
+    node* pRoot = new node_int(key);
+    q.push(pRoot);
+    if (buff) buff[0] = key;
+    int i = 1;
+    //generate keys
+    for (; i < nKeys;) {
+        key = rand() % (nKeys*range);
+        if (0 == tree_search(pRoot, key)) continue;
+        //create new node
+        node* pNode = new node_int(key);
+        tree_insert(pRoot, pNode);
+        if (buff) buff[i] = key;
+        q.push(pNode);
+        i++;
+    }
 
-  //clean
-  for (node* pNode = (node*)q.pop(); pNode != NULL; pNode = (node*)q.pop()) {
-    printf("%02d, ", (int)pNode->key());
-    delete pNode;
-  }
-  printf("\n");
+    //clean
+    for (node* pNode = (node*)q.pop(); pNode != NULL; pNode = (node*)q.pop()) {
+        printf("%02d, ", (int)pNode->key());
+        delete pNode;
+    }
+    printf("\n");
 }
 //k0+-k1+-k3
 //      +-k4
 //  +-k2
 int AVLtree_traverse_3(AVLnode* pRoot, int level = 0)
 {
-  if (pRoot == NULL) return 0;
-  printf("+-%02d(%2d)", (int)pRoot->key(), pRoot->status());
-  AVLtree_traverse_3((AVLnode*)pRoot->left(), level + 1);
-  printf("\n");
-  for (int i = 0; i < level+1; i++) printf("        ");
-  AVLtree_traverse_3((AVLnode*)pRoot->right(), level + 1);
-  return 0;
+    if (pRoot == NULL) return 0;
+    printf("+-%2d(%2d)", (int)pRoot->key(), pRoot->status());
+    AVLtree_traverse_3((AVLnode*)pRoot->left(), level + 1);
+    printf("\n");
+    for (int i = 0; i < level + 1; i++) printf("        ");
+    AVLtree_traverse_3((AVLnode*)pRoot->right(), level + 1);
+    return 0;
 }
 
 void test_avl_tree()
 {
     //generate_keys(30, 2);
     int i;
-    enum {nNode = 30};
+    enum { nNode = 50 };
     int keys[nNode] = {
-      21, 23, 35, 15, 13,
-      10, 59, 3, 55, 40,
-      50, 19, 32, 43, 57,
-      29, 18, 45, 44, 11,
-      0, 1, 47, 41, 52,
-      58, 14, 17, 12, 8,
+        38, 85, 37, 55, 43,
+        86, 78, 23, 62, 57,
+        24, 02, 17, 34, 96,
+        22, 07, 89, 91, 12,
+        61, 05, 36, 9, 41,
+        00, 31, 88, 94, 04,
+        18, 97, 68, 35, 83,
+        53, 93, 64, 65, 3,
+        58, 60, 52, 15, 30,
+        6, 25, 32, 39, 63
     };
     queue q(nNode);
     AVLnode* pNode = NULL;
@@ -887,7 +902,7 @@ void test_avl_tree()
     pRoot = new AVLnode_int(keys[0]);
     q.push(pRoot);
     //generate data
-    for(i = 1; i < nNode;) {
+    for (i = 1; i < nNode;) {
         //add node
         pNode = new AVLnode_int(keys[i]);
         q.push(pNode);
@@ -898,28 +913,46 @@ void test_avl_tree()
     AVLtree_traverse_3(pRoot);
     //clean
     for (AVLnode* pNode = (AVLnode*)q.pop(); pNode != NULL; pNode = (AVLnode*)q.pop())
-      delete pNode;
+        delete pNode;
 }
 void test_avl_tree_2()
 {
-  enum { nKeys = 30 };
-  int buff[nKeys];
-  generate_keys(buff, nKeys, 2);
-  queue q(nKeys);
-  //init
-  AVLnode* pRoot = new AVLnode_int(buff[0]);
-  q.push(pRoot);
-  //generate data
-  for (int i = 1; i < nKeys; i++) {
-    AVLnode* pNode = new AVLnode_int(buff[i]);
-    pRoot = AVLtree_insert(pRoot, pNode);
-    q.push(pNode);
-  }
-  //print tree
-  AVLtree_traverse_3(pRoot);
-  //clean
-  for (AVLnode* pNode = (AVLnode*)q.pop(); pNode != NULL; pNode = (AVLnode*)q.pop())
-    delete pNode;
+    enum { nKeys = 50 };
+    int buff[nKeys];
+    generate_keys(buff, nKeys, 2);
+    queue q(nKeys);
+    //init
+    AVLnode* pRoot = new AVLnode_int(buff[0]);
+    q.push(pRoot);
+    //generate data
+    for (int i = 1; i < nKeys; i++) {
+        AVLnode* pNode = new AVLnode_int(buff[i]);
+        pRoot = AVLtree_insert(pRoot, pNode);
+        q.push(pNode);
+    }
+    //print tree
+    AVLtree_traverse_3(pRoot);
+    //clean
+    for (AVLnode* pNode = (AVLnode*)q.pop(); pNode != NULL; pNode = (AVLnode*)q.pop())
+        delete pNode;
+}
+void test_avl_tree_3()
+{
+    enum { nNodes = 10 };
+    AVLnode* arr[nNodes];
+    //init
+    arr[0] = new  AVLnode_int(0);
+    AVLnode* pRoot = arr[0];
+    //generate data
+    for (int i = 1; i < nNodes; i++) {
+        arr[i] = new AVLnode_int(i);
+        pRoot = AVLtree_insert(pRoot, arr[i]);
+
+        printf("\n");
+        AVLtree_traverse_3(pRoot);
+    }
+
+    for (int i = 0; i < nNodes; i++) delete arr[i];
 }
 //-------------main
 
@@ -931,8 +964,9 @@ int main()
     //test_tree_remove();
     //test_tree_remove_2();
     //test_tree_search();
-  //test_avl_tree();
-  test_avl_tree_2();
-  test_avl_tree_2();
+    test_avl_tree();
+    //test_avl_tree_2();
+    //test_avl_tree_2();
+    //test_avl_tree_3();
     return 0;
 }
