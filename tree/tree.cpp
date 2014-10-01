@@ -350,19 +350,7 @@ int tree_traverse_2(node* pRoot)
     printf("\n");
     return 1;
 }
-//k0+-k1+-k3
-//      +-k4
-//  +-k2
-int tree_traverse_3(node* pRoot, int level = 0)
-{
-  if (pRoot == NULL) return 0;
-  printf("+-%02d", pRoot->key());
-  tree_traverse_3(pRoot->left(), level + 1);
-  printf("\n");
-  for (int i = 0; i < level+1; i++) printf("    ");
-  tree_traverse_3(pRoot->right(), level + 1);
-  return 0;
-}
+
 node* tree_traverse_first()
 {
     return 0;
@@ -644,7 +632,7 @@ public:
     AVLnode() {
         m_pLeft = NULL;
         m_pRight = NULL;
-        m_status = NULL;
+        m_status = 0;
     }
     node*& right() {return m_pRight;}
     node*& left() {return m_pLeft;}
@@ -860,11 +848,25 @@ void generate_keys(int* buff = NULL, int nKeys = 10, int range = 1)
 
   //clean
   for (node* pNode = (node*)q.pop(); pNode != NULL; pNode = (node*)q.pop()) {
-    printf("%02d, ", pNode->key());
+    printf("%02d, ", (int)pNode->key());
     delete pNode;
   }
   printf("\n");
 }
+//k0+-k1+-k3
+//      +-k4
+//  +-k2
+int AVLtree_traverse_3(AVLnode* pRoot, int level = 0)
+{
+  if (pRoot == NULL) return 0;
+  printf("+-%02d(%2d)", (int)pRoot->key(), pRoot->status());
+  AVLtree_traverse_3((AVLnode*)pRoot->left(), level + 1);
+  printf("\n");
+  for (int i = 0; i < level+1; i++) printf("        ");
+  AVLtree_traverse_3((AVLnode*)pRoot->right(), level + 1);
+  return 0;
+}
+
 void test_avl_tree()
 {
     //generate_keys(30, 2);
@@ -893,7 +895,7 @@ void test_avl_tree()
         i++;
     }
     //print
-    tree_traverse_3(pRoot);
+    AVLtree_traverse_3(pRoot);
     //clean
     for (AVLnode* pNode = (AVLnode*)q.pop(); pNode != NULL; pNode = (AVLnode*)q.pop())
       delete pNode;
@@ -914,7 +916,7 @@ void test_avl_tree_2()
     q.push(pNode);
   }
   //print tree
-  tree_traverse_3(pRoot);
+  AVLtree_traverse_3(pRoot);
   //clean
   for (AVLnode* pNode = (AVLnode*)q.pop(); pNode != NULL; pNode = (AVLnode*)q.pop())
     delete pNode;
