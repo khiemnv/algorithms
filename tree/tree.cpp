@@ -4,7 +4,7 @@
 #include <time.h>
 
 //debug
-#if(1)
+#if(0)
 #define TRACE               printf
 #define TRAVERSE            tree_traverse_2
 #else
@@ -86,6 +86,18 @@ public:
     virtual tree_key& key() = 0;
     virtual ~node() {}
 };
+
+class AVLnode : public node
+{
+public:
+    enum {
+        balanced = 0,
+        leftHeavy = -1,
+        rightHeavy = 1,
+    };
+    virtual int& status() = 0;
+};
+
 class node_int :public node
 {
     node* m_pLeft;
@@ -117,10 +129,32 @@ public:
         TRACE("  destroy node %d\n", (int)m_key);
     }
 };
+
+class AVLnode_int :public AVLnode
+{
+    tree_key m_key;
+    node* m_pLeft;
+    node* m_pRight;
+    int m_status;
+public:
+    AVLnode_int(int val)
+    {
+        m_key = val;
+        m_pLeft = NULL;
+        m_pRight = NULL;
+        m_status = 0;
+    }
+    tree_key& key() { return m_key; }
+    node*& left() { return m_pLeft; }
+    node*& right() { return m_pRight; }
+    int& status() { return m_status; }
+};
+
 #else
 #define NODE_RIGHT(node) node->pRight
 #define NODE_LEFT(node)  node->pLeft
 #define NODE_KEY(node)   node->key
+#define NODE_STAT(node)  node->status
 
 class node
 {
@@ -137,6 +171,19 @@ public:
     virtual ~node() {}
 };
 typedef class node node_int;
+class AVLnode :public node
+{
+public:
+    enum {
+        balanced = 0,
+        leftHeavy = -1,
+        rightHeavy = 1,
+    };
+    AVLnode(int val) :node(val){ status = 0; }
+    int status;
+    virtual ~AVLnode(){}
+};
+typedef class AVLnode AVLnode_int;
 #endif
 
 
@@ -628,65 +675,56 @@ void test_type()
 }
 
 //-------------AVLTree
-class AVLnode : public node
-{
-public:
-    enum {
-        balanced = 0,
-        leftHeavy = -1,
-        rightHeavy = 1,
-    };
-    virtual int& status() = 0;
-};
 //-------------rotate
 AVLnode* AVLtree_single_rotate_left(AVLnode* pParent)
 {
     TRACE("  single rotate left\n");
 
-    AVLnode* pRightChild = (AVLnode*)pParent->right();
+    AVLnode* pRightChild = (AVLnode*)NODE_RIGHT(pParent);
     NODE_STAT(pParent) = AVLnode::balanced;
     NODE_STAT(pRightChild) = AVLnode::balanced;
-    pParent->right() = pRightChild->left();
-    pRightChild->left() = pParent;
+    NODE_RIGHT(pParent) = NODE_LEFT(pRightChild);
+    NODE_LEFT(pRightChild) = pParent;
     return pRightChild;
 }
 AVLnode* AVLtree_single_rotate_right(AVLnode* pParent)
 {
     TRACE("  single rotate right\n");
-    AVLnode* pLeftChild = (AVLnode*)pParent->left();
+    AVLnode* pLeftChild = (AVLnode*)NODE_LEFT(pParent);
     NODE_STAT(pLeftChild) = AVLnode::balanced;
     NODE_STAT(pParent) = AVLnode::balanced;
-    pParent->left() = pLeftChild->right();
-    pLeftChild->right() = pParent;
+    NODE_LEFT(pParent) = NODE_RIGHT(pLeftChild);
+    NODE_RIGHT(pLeftChild) = pParent;
     return pLeftChild;
 }
 //only use when remove node
 AVLnode* AVLtree_special_rotate_left(AVLnode* pParent)
 {
     TRACE("  special rotate left\n");
-    AVLnode* pRightChild = (AVLnode*)pParent->right();
+    AVLnode* pRightChild = (AVLnode*)NODE_RIGHT(pParent);
     NODE_STAT(pRightChild) = AVLnode::leftHeavy;
     NODE_STAT(pParent) = AVLnode::rightHeavy;
-    pParent->right() = pRightChild->left();
-    pRightChild->left() = pParent;
+    NODE_RIGHT(pParent) = NODE_LEFT(pRightChild);
+    NODE_LEFT(pRightChild) = pParent;
     return pRightChild;
 }
 //only use when remove node
 AVLnode* AVLtree_special_rotate_right(AVLnode* pParent)
 {
     TRACE("  special rotate right\n");
-    AVLnode* pLeftChild = (AVLnode*)pParent->left();
+    AVLnode* pLeftChild = (AVLnode*)NODE_LEFT(pParent);
     NODE_STAT(pLeftChild) = AVLnode::rightHeavy;
     NODE_STAT(pParent) = AVLnode::leftHeavy;
-    pParent->left() = pLeftChild->right();
-    pLeftChild->right() = pParent;
+    NODE_LEFT(pParent) = NODE_RIGHT(pLeftChild);
+    NODE_RIGHT(pLeftChild) = pParent;
     return pLeftChild;
 }
 AVLnode* AVLtree_double_rotate_left(AVLnode* pParent)
 {
     TRACE("  double rotate left\n");
-    AVLnode* pRightChild = (AVLnode*)pParent->right();
-    AVLnode* pNewParent = (AVLnode*)pRightChild->left();
+
+    AVLnode* pRightChild = (AVLnode*)NODE_RIGHT(pParent);
+    AVLnode* pNewParent = (AVLnode*)NODE_LEFT(pRightChild);
 
     if (NODE_STAT(pNewParent) == AVLnode::leftHeavy) {
         NODE_STAT(pParent) = AVLnode::balanced;
@@ -702,10 +740,10 @@ AVLnode* AVLtree_double_rotate_left(AVLnode* pParent)
     }
     NODE_STAT(pNewParent) = AVLnode::balanced;
 
-    pRightChild->left() = pNewParent->right();
-    pNewParent->right() = pRightChild;
-    pParent->right() = pNewParent->left();
-    pNewParent->left() = pParent;
+    NODE_LEFT(pRightChild) = NODE_RIGHT(pNewParent);
+    NODE_RIGHT(pNewParent) = pRightChild;
+    NODE_RIGHT(pParent) = NODE_LEFT(pNewParent);
+    NODE_LEFT(pNewParent) = pParent;
 
     return pNewParent;
 }
@@ -713,8 +751,8 @@ AVLnode* AVLtree_double_rotate_right(AVLnode* pParent)
 {
     TRACE("  double rotate right\n");
 
-    AVLnode* pLeftChild = (AVLnode*)pParent->left();
-    AVLnode* pNewParent = (AVLnode*)pLeftChild->right();
+    AVLnode* pLeftChild = (AVLnode*)NODE_LEFT(pParent);
+    AVLnode* pNewParent = (AVLnode*)NODE_RIGHT(pLeftChild);
 
     if (NODE_STAT(pNewParent) == AVLnode::rightHeavy) {
         NODE_STAT(pParent) = AVLnode::balanced;
@@ -730,17 +768,18 @@ AVLnode* AVLtree_double_rotate_right(AVLnode* pParent)
     }
     NODE_STAT(pNewParent) = AVLnode::balanced;
 
-    pLeftChild->right() = pNewParent->left();
-    pNewParent->left() = pLeftChild;
-    pParent->left() = pNewParent->right();
-    pNewParent->right() = pParent;
+    NODE_RIGHT(pLeftChild) = NODE_LEFT(pNewParent);
+    NODE_LEFT(pNewParent) = pLeftChild;
+    NODE_LEFT(pParent) = NODE_RIGHT(pNewParent);
+    NODE_RIGHT(pNewParent) = pParent;
 
     return pNewParent;
 }
 AVLnode* AVLtree_update_left(AVLnode *pParent, int *pHeightChg)
 {
     int heightChg = 0;
-    AVLnode* pLeftChild = (AVLnode*)pParent->left();
+    AVLnode* pLeftChild = (AVLnode*)NODE_LEFT(pParent);
+
     if (NODE_STAT(pLeftChild) == AVLnode::leftHeavy) {
         pParent = AVLtree_single_rotate_right(pParent);
     }
@@ -759,7 +798,8 @@ AVLnode* AVLtree_update_left(AVLnode *pParent, int *pHeightChg)
 AVLnode* AVLtree_update_right(AVLnode *pParent, int *pHeightChg)
 {
     int heightChg = 0;
-    AVLnode* pRightChild = (AVLnode*)pParent->right();
+    AVLnode* pRightChild = (AVLnode*)NODE_RIGHT(pParent);
+
     if (NODE_STAT(pRightChild) == AVLnode::rightHeavy) {
         pParent = AVLtree_single_rotate_left(pParent);
     }
@@ -776,21 +816,23 @@ AVLnode* AVLtree_update_right(AVLnode *pParent, int *pHeightChg)
     return pParent;
 }
 //-------------alter
-AVLnode* AVLtree_insert(AVLnode*, AVLnode*, int* pHeightChg = NULL);
+AVLnode* AVLtree_insert(AVLnode*, AVLnode*, int*);
 AVLnode* AVLtree_insert_left(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
 {
     int heightChg = 0;
+    AVLnode* pLeftChild = (AVLnode*)NODE_LEFT(pRoot);
+
     //insert left
     //+ if leaf
-    if (pRoot->left() == NULL) {
-        pRoot->left() = pNode;
+    if (pLeftChild == NULL) {
+        NODE_LEFT(pRoot) = pNode;
         NODE_STAT(pRoot) -= 1;
         heightChg = (NODE_STAT(pRoot) == AVLnode::leftHeavy);
     }
     else {
         //insert to left child
         int childHeightChg;
-        pRoot->left() = AVLtree_insert((AVLnode*)pRoot->left(), pNode, &childHeightChg);
+        NODE_LEFT(pRoot) = AVLtree_insert(pLeftChild, pNode, &childHeightChg);
         NODE_STAT(pRoot) -= childHeightChg;
         //rebalance
         if (NODE_STAT(pRoot) < AVLnode::leftHeavy) {
@@ -803,18 +845,20 @@ AVLnode* AVLtree_insert_left(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
 }
 AVLnode* AVLtree_insert_right(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
 {
-    int heightChg;
+    int heightChg = 0;
+    AVLnode* pRightChild = (AVLnode*)NODE_RIGHT(pRoot);
+
     //insert right
     //+ if leaf
-    if (pRoot->right() == NULL) {
-        pRoot->right() = pNode;
+    if (NODE_RIGHT(pRoot) == NULL) {
+        NODE_RIGHT(pRoot) = pNode;
         NODE_STAT(pRoot) += 1;
         heightChg = (NODE_STAT(pRoot) == AVLnode::rightHeavy);
     }
     else {
         //insert to the right
         int childHeightChg;
-        pRoot->right() = AVLtree_insert((AVLnode*)pRoot->right(), pNode, &childHeightChg);
+        NODE_RIGHT(pRoot) = AVLtree_insert(pRightChild, pNode, &childHeightChg);
         NODE_STAT(pRoot) += childHeightChg;
         //rebalance
         if (NODE_STAT(pRoot) > AVLnode::rightHeavy) {
@@ -825,7 +869,7 @@ AVLnode* AVLtree_insert_right(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
     *pHeightChg = heightChg;
     return pRoot;
 }
-AVLnode* AVLtree_insert(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
+AVLnode* AVLtree_insert(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg = NULL)
 {
     assert(pRoot != NULL);
     assert(pNode != NULL);
@@ -845,12 +889,13 @@ AVLnode* AVLtree_insert(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
     return pRoot;
 }
 //remove a node
-AVLnode* AVLtree_remove(AVLnode*, AVLnode*, int* pHeightChg);
+AVLnode* AVLtree_remove(AVLnode*, AVLnode*, int*);
 AVLnode* AVLtree_remove_left(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
 {
     int childHeightChg;
     int heightChg = 0;
     AVLnode* pLeftChild = (AVLnode*)NODE_LEFT(pRoot);
+
     NODE_LEFT(pRoot) = AVLtree_remove(pLeftChild, pNode, &childHeightChg);
     NODE_STAT(pRoot) += childHeightChg;
     if (NODE_STAT(pRoot) > AVLnode::rightHeavy) {
@@ -865,6 +910,7 @@ AVLnode* AVLtree_remove_right(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg)
     int childHeightChg;
     int heightChg = 0;
     AVLnode* pRightChild = (AVLnode*)NODE_RIGHT(pRoot);
+
     NODE_RIGHT(pRoot) = AVLtree_remove(pRightChild, pNode, &childHeightChg);
     NODE_STAT(pRoot) -= childHeightChg;
     if (NODE_STAT(pRoot) < AVLnode::leftHeavy) {
@@ -884,12 +930,13 @@ AVLnode* AVLtree_remove(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg = NULL)
     AVLnode* pSuc = NULL;
     AVLnode* pLeftChild = (AVLnode*)NODE_LEFT(pRoot);
     AVLnode* pRightChild = (AVLnode*)NODE_RIGHT(pRoot);
+
     if (NODE_KEY(pRoot) == NODE_KEY(pNode)) {
         //replace with successor
-        if (NODE_RIGHT(pRoot) && NODE_LEFT(pRoot)) {
-            pSuc = (AVLnode*)tree_min(NODE_RIGHT(pRoot));
-            NODE_RIGHT(pSuc) = AVLtree_remove((AVLnode*)NODE_RIGHT(pRoot), pSuc, &childHeightChg);
-            NODE_LEFT(pSuc) = NODE_LEFT(pRoot);
+        if (pLeftChild && pRightChild) {
+            pSuc = (AVLnode*)tree_min(pRightChild);
+            NODE_RIGHT(pSuc) = AVLtree_remove(pRightChild, pSuc, &childHeightChg);
+            NODE_LEFT(pSuc) = pLeftChild;
             NODE_STAT(pSuc) = NODE_STAT(pRoot) - childHeightChg;
             if (NODE_STAT(pSuc) < AVLnode::leftHeavy) {
                 //rebalance
@@ -897,19 +944,12 @@ AVLnode* AVLtree_remove(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg = NULL)
             }
             heightChg = childHeightChg && (NODE_STAT(pSuc) == AVLnode::balanced);
         }
-        else if (NODE_LEFT(pRoot) != NULL) {
-            pSuc = (AVLnode*)NODE_LEFT(pRoot);
-            heightChg = 1;
-        }
-        else if (NODE_RIGHT(pRoot) != NULL) {
-            pSuc = (AVLnode*)NODE_RIGHT(pRoot);
-            heightChg = 1;
-        }
         else {
+            pSuc = (pLeftChild != NULL) ? pLeftChild : pRightChild;
             heightChg = 1;
         }
     }
-    else if (pRoot->key() > pNode->key()) {
+    else if (NODE_KEY(pRoot) > NODE_KEY(pNode)) {
         //left remove
         pRoot = AVLtree_remove_left(pRoot, pNode, &heightChg);
     }
@@ -919,31 +959,13 @@ AVLnode* AVLtree_remove(AVLnode* pRoot, AVLnode* pNode, int* pHeightChg = NULL)
         pRoot = AVLtree_remove_right(pRoot, pNode, &heightChg);
     }
 
-    if (pHeightChg != NULL)
+    if (pHeightChg != NULL) {
         *pHeightChg = heightChg;
+    }
 
     return (pRoot == pNode) ? pSuc : pRoot;
 }
 //-------------test avl tree
-class AVLnode_int :public AVLnode
-{
-    tree_key m_key;
-    node* m_pLeft;
-    node* m_pRight;
-    int m_status;
-public:
-    AVLnode_int(int val)
-    {
-        m_key = val;
-        m_pLeft = NULL;
-        m_pRight = NULL;
-        m_status = 0;
-    }
-    tree_key& key() { return m_key; }
-    node*& left() { return m_pLeft; }
-    node*& right() { return m_pRight; }
-    int& status() { return m_status; }
-};
 void generate_keys(int* buff = NULL, int nKeys = 10, int range = 1)
 {
     srand(clock());
@@ -968,7 +990,7 @@ void generate_keys(int* buff = NULL, int nKeys = 10, int range = 1)
 
     //clean
     for (node* pNode = (node*)q.pop(); pNode != NULL; pNode = (node*)q.pop()) {
-        printf("%02d, ", (int)pNode->key());
+        printf("%02d, ", (int)NODE_KEY(pNode));
         delete pNode;
     }
     printf("\n");
@@ -979,11 +1001,11 @@ void generate_keys(int* buff = NULL, int nKeys = 10, int range = 1)
 int AVLtree_traverse_3(AVLnode* pRoot, int level = 0)
 {
     if (pRoot == NULL) return 0;
-    printf("+-%2d(%2d)", (int)pRoot->key(), NODE_STAT(pRoot));
-    AVLtree_traverse_3((AVLnode*)pRoot->left(), level + 1);
+    printf("+-%2d(%2d)", (int)NODE_KEY(pRoot), NODE_STAT(pRoot));
+    AVLtree_traverse_3((AVLnode*)NODE_LEFT(pRoot), level + 1);
     printf("\n");
     for (int i = 0; i < level + 1; i++) printf("        ");
-    AVLtree_traverse_3((AVLnode*)pRoot->right(), level + 1);
+    AVLtree_traverse_3((AVLnode*)NODE_RIGHT(pRoot), level + 1);
     return 0;
 }
 
