@@ -2,9 +2,15 @@
 
 #include <stdlib.h>
 
+#if(DEBUG_MODE)
 #include <crtdbg.h>
 #define assert _ASSERT
-#define my_assert   assert
+#define MY_ASSERT   assert
+#include <stdio.h>
+#else
+#define assert(...)
+#define MY_ASSERT(...)
+#endif
 
 //-------------AVLtree_int
 //+++++implement node int
@@ -52,13 +58,27 @@ static KeyPtr node_int_get_key(NodePtr pNode) {
 static int node_int_cmp_node(NodePtr l, NodePtr r) {
     int key1 = ((node_int*)l)->iKey;
     int key2 = ((node_int*)r)->iKey;
-    int rc = (key1 > key2) ? 1 :
-        (key1 < key2) ? -1 : CMP_RES_EQU;
+    int rc = key1 - key2;
     return rc;
 }
 static int node_int_cmp_key(KeyPtr l, KeyPtr r) {
     return *(int*)l - *(int*)r;
 }
+//++debug
+#if (DEBUG_MODE)
+static int node_int_print_node(NodePtr pNode, char* buff, int buffSize) {
+    assert(buffSize > 8);
+    enum {size = 16};
+    union {
+        char z[size];
+        long long LL[1];
+    }key;
+    sprintf_s(key.z, size, "(%+d)%+-4d", ((node_int*)pNode)->status, ((node_int*)pNode)->iKey);
+    *((long long*)buff) = key.LL[0];
+    buff[8] = 0;    //truncate
+    return 8;
+}
+#endif
 //+++++init AVLtree obj
 static AVLtree AVLtree_int = {
     &node_int_set_left_child,
@@ -72,11 +92,14 @@ static AVLtree AVLtree_int = {
 
     &node_int_cmp_node,
     &node_int_cmp_key,
+#if(DEBUG_MODE)
+    &node_int_print_node,
+#endif
 };
 //+++++
 void reset_node_int(NodePtr pNode, int key)
 {
-    my_assert(pNode != NULL);
+    MY_ASSERT(pNode != NULL);
     ((node_int*)pNode)->iKey = key;
     ((node_int*)pNode)->pLeft = NULL;
     ((node_int*)pNode)->pRight = NULL;
@@ -88,6 +111,10 @@ NodePtr crt_node_int(int key) {
         reset_node_int(pNode, key);
     }
     return pNode;
+}
+void del_node_int(NodePtr pNode)
+{
+    free(pNode);
 }
 //+++++
 NodePtr iAVL_insert(NodePtr pRoot, NodePtr pNew)
@@ -105,7 +132,7 @@ NodePtr iAVL_search_key(NodePtr pRoot, int key)
 {
     assert(pRoot);
     NodePtr pNode;
-    int rc = tree_search_key(&AVLtree_int, pRoot, &key, &pNode, NULL);
+    tree_search_key(&AVLtree_int, pRoot, &key, &pNode, NULL);
     return pNode;
 }
 int iAVL_search_node(NodePtr pRoot, NodePtr pNode)
@@ -115,4 +142,11 @@ int iAVL_search_node(NodePtr pRoot, NodePtr pNode)
     int rc = tree_search_node(&AVLtree_int, pRoot, pNode, NULL);
     return (rc == 0);
 }
+#if(DEBUG_MODE)
+void iAVLtraverse(NodePtr pRoot)
+{
+    int size = AVLtree_traverse(&AVLtree_int, pRoot, 0);
+    printf("\ntree size %d\n", size);
+}
+#endif
 //+++++

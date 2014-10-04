@@ -1,13 +1,23 @@
 #include "avltree.h"
 
+#if (DEBUG_MODE)
 #include <crtdbg.h>
-#define assert _ASSERT
+#define assert      _ASSERT
 #define MY_ASSERT   assert
-#define my_assert   assert
 
 #include <stdio.h>
 #define TRACE       printf
 #define MY_PRINTF   printf
+#else
+#ifndef NULL
+#define NULL    (void*)0
+#endif
+
+#define assert(...)
+#define MY_ASSERT(...)
+#define TRACE(...)
+#define MY_PRINTF(...)
+#endif
 
 //++++++node & tree
 #define NODE_KEY(pNode)     (pTree->_get_key(pNode))
@@ -19,6 +29,10 @@
 #define SET_NODE_LEFT(p, c)     pTree->_set_left(p, c)
 #define SET_NODE_RIGHT(p, c)    pTree->_set_right(p, c)
 #define SET_NODE_STAT(p, s)     pTree->_set_status(p, s)
+//++debug
+#if(DEBUG_MODE)
+#define NODE_PRINT(pNode,b,s)   pTree->_print_node(pNode,b,s)
+#endif
 
 #define RIGHT_HEAVY 1
 #define LEFT_HEAVY  -1
@@ -27,69 +41,67 @@
 #if(1)  //AVLtree
 int tree_size(AVLtree* pTree, NodePtr pCur)
 {
-  int count = 0;
-  if (pCur != NULL) {
-    count++;
-    if (NODE_LEFT(pCur)) count += tree_size(pTree, NODE_LEFT(pCur));
-    if (NODE_RIGHT(pCur)) count += tree_size(pTree, NODE_RIGHT(pCur));
-  }
-  return count;
+    int count = 0;
+    if (pCur != NULL) {
+        count++;
+        if (NODE_LEFT(pCur)) count += tree_size(pTree, NODE_LEFT(pCur));
+        if (NODE_RIGHT(pCur)) count += tree_size(pTree, NODE_RIGHT(pCur));
+    }
+    return count;
 }
 
 int tree_search_key(AVLtree* pTree, NodePtr pRoot, KeyPtr pKey, NodePtr* ppFound, NodePtr* ppParent)
 {
-  int i=0;
-  int rc;
-  assert(pRoot != NULL);
-  NodePtr pCur = pRoot;
-  NodePtr pPrev = NULL;
-  do
-  {
-    i++;
-    rc = KEY_CMP(pKey, NODE_KEY(pCur));
-    if (rc == CMP_RES_EQU) break;
-    pPrev = pCur;
-    pCur = (rc > CMP_RES_EQU) ? NODE_RIGHT(pCur) : NODE_LEFT(pCur);
-  }
-  while (pCur);
-  if (ppFound)
-  {
-    *ppFound = pCur;
-  }
-  if (ppParent)
-  {
-    *ppParent = pPrev;
-  }
-  return rc;
+    int i = 0;
+    int rc;
+    assert(pRoot != NULL);
+    NodePtr pCur = pRoot;
+    NodePtr pPrev = NULL;
+    do
+    {
+        i++;
+        rc = KEY_CMP(pKey, NODE_KEY(pCur));
+        if (rc == CMP_RES_EQU) break;
+        pPrev = pCur;
+        pCur = (rc > CMP_RES_EQU) ? NODE_RIGHT(pCur) : NODE_LEFT(pCur);
+    } while (pCur);
+    if (ppFound)
+    {
+        *ppFound = pCur;
+    }
+    if (ppParent)
+    {
+        *ppParent = pPrev;
+    }
+    return rc;
 }
 
 int tree_search_node(AVLtree* pTree, NodePtr pRoot, NodePtr pNode, NodePtr* ppParent)
 {
-  int i=0;
-  int rc;
-  assert(pRoot != NULL);
-  assert(pNode != NULL);
-  NodePtr pCur = pRoot;
-  NodePtr pPrev = NULL;
-  do
-  {
-    i++;
-    rc = NODE_CMP(pNode, pCur);
-    if (rc == CMP_RES_EQU) break;
-    pPrev = pCur;
-    pCur = (rc > CMP_RES_EQU) ? NODE_RIGHT(pCur) : NODE_LEFT(pCur);
-  }
-  while (pCur);
-  if (ppParent)
-  {
-    *ppParent = pPrev;
-  }
-  return rc;
+    int i = 0;
+    int rc;
+    assert(pRoot != NULL);
+    assert(pNode != NULL);
+    NodePtr pCur = pRoot;
+    NodePtr pPrev = NULL;
+    do
+    {
+        i++;
+        rc = NODE_CMP(pNode, pCur);
+        if (rc == CMP_RES_EQU) break;
+        pPrev = pCur;
+        pCur = (rc > CMP_RES_EQU) ? NODE_RIGHT(pCur) : NODE_LEFT(pCur);
+    } while (pCur);
+    if (ppParent)
+    {
+        *ppParent = pPrev;
+    }
+    return rc;
 }
 
 void tree_insert(AVLtree* pTree, NodePtr pRoot, NodePtr pNode)
 {
-  MY_PRINTF("  insert root %p node %p\n", pRoot, pNode);
+    MY_PRINTF("  insert root %p node %p\n", pRoot, pNode);
     assert(pRoot != NULL);
     assert(NODE_RIGHT(pNode) == NULL);
     assert(NODE_LEFT(pNode) == NULL);
@@ -166,7 +178,7 @@ NodePtr tree_remove(AVLtree* pTree, NodePtr pRoot, NodePtr pNode)
     {
         pSuc = tree_replace(pTree, pParent, pCur, NULL);
     }
-    return (pRoot == pCur)? pSuc:pRoot;
+    return (pRoot == pCur) ? pSuc : pRoot;
 }
 
 //-------------AVLTree
@@ -391,7 +403,7 @@ NodePtr AVLtree_remove_left(AVLtree* pTree, NodePtr pRoot, NodePtr pNode, int* p
     NodePtr pLeftChild = NODE_LEFT(pRoot);
 
     SET_NODE_LEFT(pRoot, AVLtree_remove(pTree, pLeftChild, pNode, &childHeightChg));
-    SET_NODE_STAT(pRoot, NODE_STAT(pRoot ) + childHeightChg);
+    SET_NODE_STAT(pRoot, NODE_STAT(pRoot) + childHeightChg);
     if (NODE_STAT(pRoot) > RIGHT_HEAVY) {
         pRoot = AVLtree_update_right(pTree, pRoot, &heightChg);
     }
@@ -461,4 +473,28 @@ NodePtr AVLtree_remove(AVLtree* pTree, NodePtr pRoot, NodePtr pNode, int* pHeigh
 
     return (pRoot == pNode) ? pSuc : pRoot;
 }
+
+#if(DEBUG_MODE)
+//k0+-k1+-k3
+//      +-k4
+//  +-k2
+int AVLtree_traverse(AVLtree* pTree, NodePtr pRoot, int level)
+{
+    int i;
+    int count;
+    char buff[16];
+    if (pRoot == NULL) return 0;
+    //printf("+-%2d(%2d)", (int)NODE_KEY(pRoot), NODE_STAT(pRoot));
+    i = NODE_PRINT(pRoot, buff, 16);
+    printf("+-%s", buff);
+    count = 1 + AVLtree_traverse(pTree, NODE_LEFT(pRoot), level + 1);
+    if (NODE_RIGHT(pRoot) != NULL) {
+        printf("\n");
+        for (i--; i >= 0; i--){ buff[i] = ' '; }
+        for (i = 0; i <= level; i++) printf("| %s", buff);
+        count += AVLtree_traverse(pTree, NODE_RIGHT(pRoot), level + 1);
+    }
+    return count;
+}
+#endif  //DEBUG_MODE
 #endif  //AVLtree
