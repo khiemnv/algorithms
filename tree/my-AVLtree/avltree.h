@@ -61,6 +61,7 @@ typedef struct avl_tree
 int tree_traverse(AVLtree* pTree, NodePtr);
 int tree_size(AVLtree* pTree, NodePtr pCur);
 int tree_search_key(AVLtree* pTree, NodePtr pRoot, KeyPtr pKey, NodePtr* ppFound, NodePtr* ppParent);
+int tree_ge_key(AVLtree* pTree, NodePtr pRoot, KeyPtr pKey, NodePtr* ppFound);
 int tree_search_node(AVLtree* pTree, NodePtr pRoot, NodePtr pNode, NodePtr* ppParent);
 void tree_insert(AVLtree* pTree, NodePtr pRoot, NodePtr pNode);
 NodePtr tree_min(AVLtree* pTree, NodePtr pRoot);
@@ -94,6 +95,7 @@ void del_node_int(NodePtr pNode);
 NodePtr iAVL_insert(NodePtr pRoot, NodePtr pNew);
 NodePtr iAVL_remove(NodePtr pRoot, NodePtr pNode);
 NodePtr iAVL_search_key(NodePtr pRoot, int key);
+NodePtr iAVL_ge_key(NodePtr pRoot, int key);
 int iAVL_search_node(NodePtr pRoot, NodePtr pNode);
 //++traverse
 #if(DEBUG_MODE)

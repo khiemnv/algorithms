@@ -76,6 +76,31 @@ int tree_search_key(AVLtree* pTree, NodePtr pRoot, KeyPtr pKey, NodePtr* ppFound
     return rc;
 }
 
+//search the node geater or equal key
+//if (found equal key) return 0
+//else return 1
+int tree_ge_key(AVLtree* pTree, NodePtr pRoot, KeyPtr pKey, NodePtr* ppFound)
+{
+  int rc;
+  assert(pRoot != NULL);
+  NodePtr pCur = pRoot;
+  NodePtr pGt = NULL;
+  do
+  {
+    rc = KEY_CMP(pKey, NODE_KEY(pCur));
+    if (rc == CMP_RES_EQU) break;
+    pGt = rc < CMP_RES_EQU ? pCur : pGt;
+    pCur = (rc > CMP_RES_EQU) ? NODE_RIGHT(pCur) : NODE_LEFT(pCur);
+  } while (pCur);
+  pCur = rc != CMP_RES_EQU ? pGt : pCur;
+  rc = rc != CMP_RES_EQU;
+  if (ppFound)
+  {
+    *ppFound = pCur;
+  }
+  return rc;
+}
+
 int tree_search_node(AVLtree* pTree, NodePtr pRoot, NodePtr pNode, NodePtr* ppParent)
 {
     int i = 0;

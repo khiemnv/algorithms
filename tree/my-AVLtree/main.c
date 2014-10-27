@@ -29,6 +29,8 @@ int main(void)
     iAVLtraverse(pRoot);
 
     for (i = 0; i < nNode; i++) {
+        pRoot = iAVL_remove(pRoot, arr[i]);
+        NodePtr pFound = iAVL_ge_key(pRoot, i);
         del_node_int(arr[i]);
     }
 

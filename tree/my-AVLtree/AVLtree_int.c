@@ -135,6 +135,13 @@ NodePtr iAVL_search_key(NodePtr pRoot, int key)
     tree_search_key(&AVLtree_int, pRoot, &key, &pNode, NULL);
     return pNode;
 }
+NodePtr iAVL_ge_key(NodePtr pRoot, int key)
+{
+  assert(pRoot);
+  NodePtr pNode;
+  tree_ge_key(&AVLtree_int, pRoot, &key, &pNode);
+  return pNode;
+}
 int iAVL_search_node(NodePtr pRoot, NodePtr pNode)
 {
     assert(pRoot);
