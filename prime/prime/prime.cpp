@@ -418,7 +418,7 @@ public:
 	}
 };
 
-#define max_depth (32)
+#define max_depth (64)
 #define use_sqrt 1
 //#pragma intrinsic(_umul128)
 //#define primeLstLen primeLst.count
@@ -441,7 +441,10 @@ public:
 		UINT32 arr[] = { 2,3,5,7,11,13 };
 		UINT32 i;
 		UINT64 lastPrime = maxPrime;
+
+		UINT64 c=0;
 		UINT64 lim;
+
 		UINT64 maxPrimeIndex = 0;
 		UINT64 added;
 		bool bRet;
@@ -455,24 +458,14 @@ public:
 			lastPrime = primeLst[primeLstLen - 1];
 		}
 
-		assert(lastPrime < (MAXUINT64 / 3));
-
 		//start
 		for (;;) {
-			lim = ((UINT64)3 * (UINT64)lastPrime) - (UINT64)2;
+			lim = _umul128((UINT64)3, (UINT64)lastPrime, &c);
+			lim = (c == 0) ? lim : MAXUINT64;
 			if (lim > maxNum) {
 				lim = maxNum;
 			}
-#if use_sqrt
-			UINT64 limSqrt = sqrt(lim);
-			maxPrimeIndex = primeLst.findIndex(limSqrt);
-			/*while (primeLst[maxPrimeIndex] < limSqrt)
-			{
-				maxPrimeIndex++;
-			}*/
-#endif
-			lastPrime += 2;
-			bRet = numDict.fill(lastPrime, lim);
+			bRet = numDict.fill(lastPrime+2, lim-2);
 			assert(bRet);
 			if (!bRet) {
 				lim = numDict.getMaxNum();
@@ -481,8 +474,13 @@ public:
 				//ignore(i);
 			//}
 #if use_sqrt
-			for (UINT64 iPrime = 1; iPrime <= maxPrimeIndex; iPrime++) {
-				filter2(iPrime, primeLst[iPrime]);
+			UINT64 limSqrt = sqrt(lim);
+			for (UINT64 iPrime = 1;; iPrime++) {
+				UINT64 baseNum = primeLst[iPrime];
+				if (baseNum > limSqrt) {
+					break;
+				}
+				filter2(iPrime, baseNum);
 			}
 #else
 			filter2();
@@ -562,6 +560,7 @@ private:
 		UINT64 minNum = numDict.getMinNum();
 		UINT64 maxNum = numDict.getMaxNum();
 		assert(maxNum < MAXUINT64);
+
 		UINT64 c = 0;
 		UINT64 curValue = curNode->value;
 		for (;;) {
